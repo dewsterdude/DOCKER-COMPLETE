@@ -1,0 +1,52 @@
+# version: "4.0" # can lock in a certain version of docker-compose if needed (visit https://docs.docker.com/compose/compose-file/ for details
+# when you shut down compose, it will auto shut down all instances
+
+services: 
+  mongodb:
+    image: 'mongo'
+    volumes:
+      - data:/data/db    # could ad ro to make this readonly
+    # environment:
+    #  MONGO_INITDB_ROOT_USERNAME: max   
+    #  MONGO_INITDB_ROOT_PASSWORD: secret
+    #   - MONGO_INITDB_ROOT_USERNAME=max   # is another alternative
+    env_file:
+      - ./mongo.env
+    # networks:  # optional - can define custom networks if needed docker compose already does this for all files in the same compose 
+  backend:        
+    build: ./backend   # path to backend dockerfile, compose would go into this folder and use the dockerfile
+    #build:
+    #  context: ./backend
+    #  dockerfile: Dockerfile-dev
+    #  args:
+    #    MONGODBUSERNAME: max
+    #    MONGODBPASSWORD: secret
+    image: 'goals-node'   # name of image we will build
+    ports: 
+      - '80:80' 
+    volumes:
+      - logs:/app/logs  # map a named volume to a path in the container
+      - ./backend:/app  # map the backend source code into the container - relative to location of Yaml file
+      - /app/node_modules  # to avoid overwriting node_modules in container with empty folder from host
+    env_file:
+      - ./backend/mongo.env
+    depends_on:
+      - mongodb
+  frontend:
+    build: ./frontend
+    ports:
+      - '3000:3000'
+    volumes:
+      - ./frontend/src:/app/src # bind mount to ensure source changes are reflected immediately in container
+    stdin_open: true  # to keep container running for interactive mode
+    tty: true         # to keep container running for interactive mode
+    depends_on: 
+      - backend
+
+    # networks:  # optional - can define custom networks if needed docker compose already does this for all files in the same compose
+
+volumes:  # named volumens
+  data:
+  logs:  # named volume - docker manages the location - this is the syntax docker wants to create volumes.  Volumes named the same WILL be shared
+
+
