@@ -1,0 +1,18 @@
+# will hold 6 containers
+
+version: "3.8"  # specify docker compose version
+
+services:
+  server: #nginx web server, if you search docker you'll find an official ngins
+    image: "nginx:stable-alpine"  # slim & stable specify image to use - official nginx image from docker hub
+    ports:
+      - '8000:80'  # look at documentation, nginx defaults to port 80 map port 80 in container to port 8080 on host
+    volumes: 
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro  # map custom conf file into container
+
+  php: #responsible for laravel and php server
+  
+  #mysql:
+  #composer:
+  #npm:
+  #artisan:  #laravel artisan commands
