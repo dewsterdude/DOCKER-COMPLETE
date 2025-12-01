@@ -8,11 +8,26 @@ services:
     ports:
       - '8000:80'  # look at documentation, nginx defaults to port 80 map port 80 in container to port 8080 on host
     volumes: 
-      - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro  # map custom conf file into container
+      - ./src:/var/www/html  # map source code into container, ro makes it readonly
+      - ./nginx/nginx.conf:/etc/nginx/conf.d/default.conf:ro  # map custom conf file into container
 
   php: #responsible for laravel and php server
+    build: 
+      context: ./dockerfiles
+      dockerfile: php.dockerfile
+    volumes:
+      - ./src:/var/www/html:delegated  # map source code into container.  Delegated helps with performance, can run in batch
+   #ports: not required because of local network
+  mysql:
+    image: 'mysql:latest'  # official mysql image from docker hub
+    env_file:
+      - ./env/mysql.env
+  composer: #utility container to run composer commands 
+    build: 
+      context: ./dockerfiles
+      dockerfile: composer.dockerfile
+    volumes:
+      - ./src:/var/www/html  # map source code into container
   
-  #mysql:
-  #composer:
   #npm:
   #artisan:  #laravel artisan commands
